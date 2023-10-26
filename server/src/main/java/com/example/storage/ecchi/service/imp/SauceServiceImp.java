@@ -67,7 +67,7 @@ public class SauceServiceImp implements SauceService {
 
 		Sauce sauce = optionalSauce.get();
 		String firstTypeId = sauce.getSauceType().get(0).getType().getName();
-		
+
 		if (firstTypeId.contains("Image")) {
 			cloudinary.config.secure = true;
 			Map<?, ?> deleteParams = ObjectUtils.asMap("invalidate", true);
@@ -87,38 +87,79 @@ public class SauceServiceImp implements SauceService {
 		return null;
 	}
 
+//	@Override
+//	public List<SauceModel> uploadImage(MultipartFile[] files) {
+//		cloudinary.config.secure = true;
+//		List<SauceModel> sauceModels = new ArrayList<>();
+//		for (MultipartFile file : files) {
+//			try {
+//				Map<?, ?> uploadFile = cloudinary.uploader().upload(file.getBytes(),
+//						ObjectUtils.asMap("folder", "/HImage/"));
+//				String fileName = uploadFile.get("original_filename").toString();
+//				String secretUrl = uploadFile.get("secure_url").toString();
+//				String public_id = uploadFile.get("public_id").toString();
+//				SauceType sauceType = new SauceType();
+//				sauceType.setType(sauceTypeRepository.getImageType());
+//				Sauce sauce = new Sauce();
+//				sauce.setName(fileName);
+//				sauce.setSauceUrl(secretUrl);
+//				sauce.setSauceImage(public_id);
+//				SauceHistory sauceHistory = new SauceHistory();
+//				sauceHistory.setDateUpload(new Date());
+//				sauce.setSauceType(List.of(sauceType));
+//				sauce.setSauceHistory(List.of(sauceHistory));
+//				sauceRepository.save(sauce);
+//				sauceHistory.setSauce(sauce);
+//				sauceType.setSauce(sauce);
+//				sauceTypeRepository.save(sauceType);
+//				sauceHistoryRepository.save(sauceHistory);
+//				sauceModels.add(transformer.apply(sauce));
+//			} catch (IOException e) {
+//				return null;
+//			}
+//		}
+//		return sauceModels;
+//	}
+
 	@Override
 	public List<SauceModel> uploadImage(MultipartFile[] files) {
 		cloudinary.config.secure = true;
 		List<SauceModel> sauceModels = new ArrayList<>();
+
 		for (MultipartFile file : files) {
 			try {
-				Map<?, ?> uploadFile = cloudinary.uploader().upload(file.getBytes(),
-						ObjectUtils.asMap("folder", "/HImage/"));
+				Map<String, Object> uploadFile = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("folder", "/HImage/"));
 				String fileName = uploadFile.get("original_filename").toString();
 				String secretUrl = uploadFile.get("secure_url").toString();
 				String public_id = uploadFile.get("public_id").toString();
+
 				SauceType sauceType = new SauceType();
 				sauceType.setType(sauceTypeRepository.getImageType());
+
 				Sauce sauce = new Sauce();
 				sauce.setName(fileName);
 				sauce.setSauceUrl(secretUrl);
 				sauce.setSauceImage(public_id);
+
 				SauceHistory sauceHistory = new SauceHistory();
 				sauceHistory.setDateUpload(new Date());
-				sauce.setSauceType(List.of(sauceType));
-				sauce.setSauceHistory(List.of(sauceHistory));
+
+				sauce.setSauceType(Collections.singletonList(sauceType));
+				sauce.setSauceHistory(Collections.singletonList(sauceHistory));
+
 				sauceRepository.save(sauce);
 				sauceHistory.setSauce(sauce);
 				sauceType.setSauce(sauce);
+
 				sauceTypeRepository.save(sauceType);
 				sauceHistoryRepository.save(sauceHistory);
+
 				sauceModels.add(transformer.apply(sauce));
 			} catch (IOException e) {
+				System.out.println("Upload image: " + e.getMessage());
 				return null;
 			}
 		}
 		return sauceModels;
 	}
-
 }
