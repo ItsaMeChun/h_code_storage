@@ -1,10 +1,7 @@
 package com.example.storage.ecchi.service.imp;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -60,8 +57,17 @@ public class SauceServiceImp implements SauceService {
 
 	@Override
 	public boolean deleteSauce(int id) {
-		Sauce sauce = sauceRepository.findById(id).get();
+//		Sauce sauce = sauceRepository.findById(id).get();
+		Optional<Sauce> optionalSauce = sauceRepository.findById(id);
+
+		if(!optionalSauce.isPresent()) {
+			System.out.println("why i'm still here, just to do this stuff");
+			return false;
+		}
+
+		Sauce sauce = optionalSauce.get();
 		String firstTypeId = sauce.getSauceType().get(0).getType().getName();
+		
 		if (firstTypeId.contains("Image")) {
 			cloudinary.config.secure = true;
 			Map<?, ?> deleteParams = ObjectUtils.asMap("invalidate", true);
